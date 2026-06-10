@@ -4,6 +4,8 @@ import logging
 import traceback
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
@@ -12,7 +14,7 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="Loan Document Q&A", version="1.0.0")
+app = FastAPI(title="DocAI", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -64,3 +66,16 @@ def ask_question(request: QuestionRequest):
         success=result["success"],
         response_time_ms=elapsed,
     )
+
+# Serve React frontend — must be last
+static_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "static")
+if os.path.exists(static_dir):
+    assets_dir = os.path.join(static_dir, "assets")
+    if os.path.exists(assets_dir):
+        app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
+
+    @app.get("/")
+    @app.get("/{full_path:path}")
+    def serve_frontend(full_path: str = ""):
+        index = os.path.join(static_dir, "index.html")
+        return FileResponse(index)
