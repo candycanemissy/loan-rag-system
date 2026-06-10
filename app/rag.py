@@ -3,7 +3,7 @@ import logging
 import traceback
 from dotenv import load_dotenv
 from langchain_huggingface import HuggingFaceEmbeddings, HuggingFaceEndpoint, ChatHuggingFace
-from langchain.schema import HumanMessage
+from langchain_core.messages import HumanMessage
 from supabase import create_client
 
 load_dotenv()
